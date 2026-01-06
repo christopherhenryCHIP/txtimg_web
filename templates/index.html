@@ -4,45 +4,114 @@
 <meta charset="utf-8">
 <title>Text Image Generator</title>
 <style>
-    body {
-        background: #111;
-        color: white;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        min-height: 100vh;
-        font-family: sans-serif;
-        padding: 20px;
-    }
-    textarea { width: 90%; max-width: 500px; height: 120px; font-size: 18px; }
-    input, label { margin: 5px 0; }
-    button { margin-top: 10px; padding: 10px 20px; font-size: 18px; cursor: pointer; }
-    img { margin-top: 20px; max-width: 100%; height: auto; }
+body {
+    background: #f5f0e6; /* beige */
+    color: #000000; /* black text */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    font-family: sans-serif;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+textarea {
+    width: 100%;
+    height: 150px;
+    font-size: 1.2em;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    resize: vertical;
+}
+
+label {
+    font-size: 1em;
+    margin-top: 10px;
+}
+
+input[type="color"],
+input[type="number"] {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    font-size: 1em;
+    padding: 5px;
+    width: 100%;
+    max-width: 120px;
+}
+
+button {
+    margin-top: 15px;
+    padding: 12px 25px;
+    font-size: 1.2em;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #000000;
+    color: #ffffff;
+}
+
+button:hover {
+    background-color: #333333;
+}
+
+p {
+    margin-top: 20px;
+    font-size: 0.95em;
+    text-align: center;
+}
+
+img {
+    margin-top: 20px;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
 </style>
 </head>
 <body>
-<h1>Generate Image</h1>
+<h1>Text Image Generator</h1>
 <form method="POST">
-    <textarea name="text">LINE ONE\nLINE TWO\nLINE THREE</textarea><br>
+    <textarea name="text">LINE ONE\nLINE TWO\nLINE THREE</textarea>
 
     <label for="text_color">Text color:</label>
-    <input type="color" name="text_color" value="#0000ff"><br>
+    <input type="color" name="text_color" value="#000000">
 
     <label for="bg_color">Background color:</label>
-    <input type="color" name="bg_color" value="#000000"><br>
+    <input type="color" name="bg_color" value="#f5f0e6">
 
     <label for="text_size">Text size (% of width):</label>
-    <input type="number" name="text_size" min="1" max="50" value="9"><br>
+    <input type="number" name="text_size" min="1" max="50" value="12">
 
     <label for="text_alpha">Text transparency (%):</label>
-    <input type="number" name="text_alpha" min="0" max="100" value="100"><br>
+    <input type="number" name="text_alpha" min="0" max="100" value="100">
 
     <label for="bg_alpha">Background transparency (%):</label>
-    <input type="number" name="bg_alpha" min="0" max="100" value="100"><br>
+    <input type="number" name="bg_alpha" min="0" max="100" value="100">
 
     <button type="submit">Generate</button>
 </form>
-<p>After generating, long-press the image to save it.</p>
+<p>After generating, long-press the image to save it on your device.</p>
 </body>
 </html>
