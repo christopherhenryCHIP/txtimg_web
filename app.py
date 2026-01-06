@@ -21,45 +21,50 @@ def hex_to_rgb(hex_color):
         # Default to blue
         return (0, 0, 255)
 
-# Generate image with options
-def generate_image(text, text_color="#0000ff", bg_color="#000000",
-                   text_size_percent=0.09, text_alpha=255, bg_alpha=255):
-    try:
-        # Convert colors to RGBA
-        text_rgba = hex_to_rgb(text_color) + (text_alpha,)
-        bg_rgba = hex_to_rgb(bg_color) + (bg_alpha,)
+# Generate image with true transparency
+def generate_image(text, text_color="#000000", bg_color="#f5f0e6",
+                   text_size_percent=0.12, text_alpha=255, bg_alpha=255):
+    # Background RGBA
+    bg_rgba = hex_to_rgb(bg_color) + (bg_alpha,)
+    image = Image.new("RGBA", (WIDTH, HEIGHT), bg_rgba)
 
-        # Create image
-        image = Image.new("RGBA", (WIDTH, HEIGHT), bg_rgba)
-        draw = ImageDraw.Draw(image)
+    # Transparent text layer
+    text_layer = Image.new("RGBA", (WIDTH, HEIGHT), (0,0,0,0))
+    draw = ImageDraw.Draw(text_layer)
 
-        # Font size
-        font_size = max(1, int(WIDTH * text_size_percent))
-        font = ImageFont.truetype(FONT_PATH, size=font_size)
+    # Font
+    font_size = max(1, int(WIDTH * text_size_percent))
+    font = ImageFont.truetype(FONT_PATH, size=font_size)
 
-        # Normalize line breaks
-        text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
 
-        # Measure multiline text
-        bbox = draw.multiline_textbbox((0, 0), text, font=font, spacing=int(font_size*0.4), align="center")
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
+    # Measure text
+    bbox = draw.multiline_textbbox((0,0), text, font=font, spacing=int(font_size*0.4), align="center")
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
 
-        # Center text
-        x = (WIDTH - text_width) / 2
-        y = (HEIGHT - text_height) / 2
+    # Center
+    x = (WIDTH - text_width) / 2
+    y = (HEIGHT - text_height) / 2
 
-        # Draw text
-        draw.multiline_text((x, y), text, font=font, fill=text_rgba,
-                            spacing=int(font_size*0.4), align="center")
+    # Draw text on transparent layer
+    draw.multiline_text(
+        (x, y),
+        text,
+        font=font,
+        fill=hex_to_rgb(text_color)+(text_alpha,),
+        spacing=int(font_size*0.4),
+        align="center"
+    )
 
-        # Save to buffer
-        buffer = io.BytesIO()
-        image.save(buffer, format="PNG")
-        buffer.seek(0)
-        return buffer
-    except Exception as e:
-        raise RuntimeError(f"Image generation failed: {str(e)}")
+    # Composite text onto background
+    image = Image.alpha_composite(image, text_layer)
+
+    # Save to buffer
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer
 
 # Flask route
 @app.route("/", methods=["GET", "POST"])
@@ -67,17 +72,16 @@ def index():
     if request.method == "POST":
         try:
             text = request.form.get("text", "LINE ONE\nLINE TWO\nLINE THREE")
+            text_color = request.form.get("text_color", "#000000")
+            bg_color = request.form.get("bg_color", "#f5f0e6")
 
-            text_color = request.form.get("text_color", "#0000ff")
-            bg_color = request.form.get("bg_color", "#000000")
-
-            # Text size (% of width)
+            # Text size
             try:
-                text_size_percent = float(request.form.get("text_size", 9)) / 100
+                text_size_percent = float(request.form.get("text_size", 12)) / 100
                 if text_size_percent <= 0:
-                    text_size_percent = 0.09
+                    text_size_percent = 0.12
             except (ValueError, TypeError):
-                text_size_percent = 0.09
+                text_size_percent = 0.12
 
             # Transparency
             try:
@@ -102,7 +106,6 @@ def index():
                 mimetype="image/png"
             )
         except Exception as e:
-            # Catch all unexpected errors
             return f"Error generating image: {str(e)}", 500
 
     return render_template("index.html")
