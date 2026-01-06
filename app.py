@@ -8,71 +8,106 @@ app = Flask(__name__)
 # Constants
 WIDTH = 1320
 HEIGHT = 2868
-FONT_PATH = os.path.join("fonts", "arial bold.ttf")
+FONT_PATH = os.path.join("fonts", "arial bold.ttf")  # relative path for Render
 
-# Helper: hex to RGB
+# Convert hex color #RRGGBB to RGB tuple safely
 def hex_to_rgb(hex_color):
-    hex_color = hex_color.lstrip("#")
-    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    try:
+        hex_color = hex_color.strip().lstrip("#")
+        if len(hex_color) != 6:
+            raise ValueError
+        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    except Exception:
+        # Default to blue
+        return (0, 0, 255)
 
-# Image generation
+# Generate image with options
 def generate_image(text, text_color="#0000ff", bg_color="#000000",
                    text_size_percent=0.09, text_alpha=255, bg_alpha=255):
-    text_rgb = hex_to_rgb(text_color) + (text_alpha,)
-    bg_rgb = hex_to_rgb(bg_color) + (bg_alpha,)
+    try:
+        # Convert colors to RGBA
+        text_rgba = hex_to_rgb(text_color) + (text_alpha,)
+        bg_rgba = hex_to_rgb(bg_color) + (bg_alpha,)
 
-    # Create image
-    image = Image.new("RGBA", (WIDTH, HEIGHT), bg_rgb)
-    draw = ImageDraw.Draw(image)
+        # Create image
+        image = Image.new("RGBA", (WIDTH, HEIGHT), bg_rgba)
+        draw = ImageDraw.Draw(image)
 
-    # Font size
-    font_size = int(WIDTH * text_size_percent)
-    font = ImageFont.truetype(FONT_PATH, size=font_size)
+        # Font size
+        font_size = max(1, int(WIDTH * text_size_percent))
+        font = ImageFont.truetype(FONT_PATH, size=font_size)
 
-    # Normalize line breaks
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
+        # Normalize line breaks
+        text = text.replace("\r\n", "\n").replace("\r", "\n")
 
-    # Measure text
-    bbox = draw.multiline_textbbox((0,0), text, font=font, spacing=int(font_size*0.4), align="center")
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+        # Measure multiline text
+        bbox = draw.multiline_textbbox((0, 0), text, font=font, spacing=int(font_size*0.4), align="center")
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
 
-    # Center
-    x = (WIDTH - text_width) / 2
-    y = (HEIGHT - text_height) / 2
+        # Center text
+        x = (WIDTH - text_width) / 2
+        y = (HEIGHT - text_height) / 2
 
-    # Draw text
-    draw.multiline_text((x, y), text, font=font, fill=text_rgb,
-                        spacing=int(font_size*0.4), align="center")
+        # Draw text
+        draw.multiline_text((x, y), text, font=font, fill=text_rgba,
+                            spacing=int(font_size*0.4), align="center")
 
-    # Save to buffer
-    buffer = io.BytesIO()
-    image.save(buffer, format="PNG")
-    buffer.seek(0)
-    return buffer
+        # Save to buffer
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        buffer.seek(0)
+        return buffer
+    except Exception as e:
+        raise RuntimeError(f"Image generation failed: {str(e)}")
 
 # Flask route
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        text = request.form.get("text", "LINE ONE\nLINE TWO\nLINE THREE")
-        text_color = request.form.get("text_color", "#0000ff")
-        bg_color = request.form.get("bg_color", "#000000")
-        text_size_percent = float(request.form.get("text_size", 9)) / 100
+        try:
+            text = request.form.get("text", "LINE ONE\nLINE TWO\nLINE THREE")
 
-        text_alpha = int(request.form.get("text_alpha", 100) * 255 / 100)
-        bg_alpha = int(request.form.get("bg_alpha", 100) * 255 / 100)
+            text_color = request.form.get("text_color", "#0000ff")
+            bg_color = request.form.get("bg_color", "#000000")
 
-        return send_file(
-            generate_image(
-                text, text_color, bg_color,
-                text_size_percent, text_alpha, bg_alpha
-            ),
-            mimetype="image/png"
-        )
+            # Text size (% of width)
+            try:
+                text_size_percent = float(request.form.get("text_size", 9)) / 100
+                if text_size_percent <= 0:
+                    text_size_percent = 0.09
+            except (ValueError, TypeError):
+                text_size_percent = 0.09
+
+            # Transparency
+            try:
+                text_alpha_val = int(request.form.get("text_alpha", 100) * 255 / 100)
+            except (ValueError, TypeError):
+                text_alpha_val = 255
+
+            try:
+                bg_alpha_val = int(request.form.get("bg_alpha", 100) * 255 / 100)
+            except (ValueError, TypeError):
+                bg_alpha_val = 255
+
+            return send_file(
+                generate_image(
+                    text,
+                    text_color=text_color,
+                    bg_color=bg_color,
+                    text_size_percent=text_size_percent,
+                    text_alpha=text_alpha_val,
+                    bg_alpha=bg_alpha_val
+                ),
+                mimetype="image/png"
+            )
+        except Exception as e:
+            # Catch all unexpected errors
+            return f"Error generating image: {str(e)}", 500
+
     return render_template("index.html")
 
-# Render port
+# Run on Render port
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
