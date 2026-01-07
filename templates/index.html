@@ -3,115 +3,88 @@
 <head>
 <meta charset="utf-8">
 <title>Text Image Generator</title>
+
 <style>
 body {
-    background: #f5f0e6; /* beige */
-    color: #000000; /* black text */
+    background: #f5f0e6;
+    color: #000;
+    font-family: sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-    font-family: sans-serif;
     padding: 20px;
 }
 
 h1 {
-    font-size: 2.2em;
     margin-bottom: 20px;
-    text-align: center;
 }
 
 form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 500px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    max-width: 500px;
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 textarea {
     width: 100%;
     height: 150px;
     font-size: 1.2em;
-    padding: 10px;
     margin-bottom: 15px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    resize: vertical;
 }
 
 label {
-    font-size: 1em;
     margin-top: 10px;
 }
 
 input[type="color"],
 input[type="number"] {
     margin-top: 5px;
-    margin-bottom: 10px;
     font-size: 1em;
-    padding: 5px;
-    width: 100%;
-    max-width: 120px;
+    padding: 6px;
+    width: 120px;
 }
 
 button {
-    margin-top: 15px;
-    padding: 12px 25px;
-    font-size: 1.2em;
-    cursor: pointer;
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 1.1em;
+    background: black;
+    color: white;
     border: none;
-    border-radius: 5px;
-    background-color: #000000;
-    color: #ffffff;
-}
-
-button:hover {
-    background-color: #333333;
-}
-
-p {
-    margin-top: 20px;
-    font-size: 0.95em;
-    text-align: center;
-}
-
-img {
-    margin-top: 20px;
-    max-width: 100%;
-    height: auto;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 6px;
 }
 </style>
 </head>
+
 <body>
 <h1>Text Image Generator</h1>
-<form method="POST">
-    <textarea name="text">LINE ONE\nLINE TWO\nLINE THREE</textarea>
 
-    <label for="text_color">Text color:</label>
+<form method="POST">
+    <textarea name="text">LINE ONE
+LINE TWO
+LINE THREE</textarea>
+
+    <label>Text colour</label>
     <input type="color" name="text_color" value="#000000">
 
-    <label for="bg_color">Background color:</label>
+    <label>Background colour</label>
     <input type="color" name="bg_color" value="#f5f0e6">
 
-    <label for="text_size">Text size (% of width):</label>
+    <label>Text size (% of width)</label>
     <input type="number" name="text_size" min="1" max="50" value="12">
 
-    <label for="text_alpha">Text transparency (%):</label>
+    <label>Text opacity (%)</label>
     <input type="number" name="text_alpha" min="0" max="100" value="100">
 
-    <label for="bg_alpha">Background transparency (%):</label>
+    <label>Background opacity (%)</label>
     <input type="number" name="bg_alpha" min="0" max="100" value="100">
 
     <button type="submit">Generate</button>
 </form>
-<p>After generating, long-press the image to save it on your device.</p>
 </body>
 </html>
