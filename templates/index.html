@@ -15,10 +15,6 @@ body {
     padding: 20px;
 }
 
-h1 {
-    margin-bottom: 20px;
-}
-
 form {
     background: white;
     padding: 20px;
@@ -42,18 +38,23 @@ label {
 }
 
 input[type="number"] {
-    margin-top: 5px;
-    font-size: 1em;
-    padding: 6px;
     width: 120px;
+    padding: 6px;
 }
 
 input[type="color"] {
-    margin-top: 8px;
     width: 44px;
     height: 44px;
     padding: 0;
     border: none;
+    margin-top: 8px;
+}
+
+select {
+    margin-top: 5px;
+    padding: 6px;
+    font-size: 1em;
+    width: 160px;
 }
 
 button {
@@ -75,6 +76,12 @@ button {
     <textarea name="text">LINE ONE
 LINE TWO
 LINE THREE</textarea>
+
+    <label>Font</label>
+    <select name="font">
+        <option value="arial">Arial Bold</option>
+        <option value="times">Times New Roman</option>
+    </select>
 
     <label>Text colour</label>
     <input type="color" name="text_color" value="#000000">
